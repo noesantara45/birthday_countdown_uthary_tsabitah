@@ -1,2 +1,2 @@
-# birthday_countdown_uthary_tsabitah
+# index.html
 Birthday Countdown Clock untuk Uthary Tsabitah
