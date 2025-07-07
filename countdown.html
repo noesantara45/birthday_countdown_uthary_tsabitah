@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ulang Tahun Uthary Tsabitah!</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons (still useful for back-face '?' or future expansion) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom font if needed, otherwise Tailwind's default (Inter) is good */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FAD0C4; /* Soft Coral - Muted sunset background */
+        }
+        .countdown-digit {
+            font-variant-numeric: tabular-nums; /* Ensures digits have same width */
+        }
+        /* Custom scrollbar for aesthetic, if content overflows */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFF8DC; /* Cornsilk - light sandy */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CD853F; /* Peru - muted orange-brown */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D2691E; /* Chocolate - slightly darker */
+        }
+
+        /* Memory Game specific styles */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns */
+            gap: 1rem; /* 16px */
+            max-width: 400px; /* Limit grid width */
+            margin: 0 auto;
+        }
+        .memory-card {
+            width: 80px; /* Fixed width for cards */
+            height: 80px; /* Fixed height for cards */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #CD853F; /* Peru - card back */
+            border-radius: 0.5rem; /* rounded-lg */
+            cursor: pointer;
+            font-size: 0.9rem; /* Smaller font for names */
+            font-weight: bold;
+            color: #FFFACD; /* Lemon Chiffon - text on card back */
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid #A52A2A; /* Brown - card border */
+            text-align: center; /* Center text for names */
+            padding: 5px; /* Add padding for longer names */
+            line-height: 1.2; /* Adjust line height for readability */
+        }
+        .memory-card.flipped {
+            transform: rotateY(180deg);
+            background-color: #FFFACD; /* Lemon Chiffon - card front */
+            color: #8B0000; /* Dark Red - text on card front */
+        }
+        .memory-card.matched {
+            background-color: #FF7F50; /* Coral - matched card */
+            color: #FFFACD; /* Lemon Chiffon - text on matched card */
+            cursor: default;
+            opacity: 0.8;
+        }
+        .memory-card .front-face,
+        .memory-card .back-face {
+            position: absolute;
+            backface-visibility: hidden;
+        }
+        .memory-card .front-face {
+            transform: rotateY(180deg);
+        }
+        .memory-card.flipped .front-face {
+            transform: rotateY(0deg);
+        }
+        .memory-card.flipped .back-face {
+            transform: rotateY(180deg);
+        }
+
+        /* Animation for birthday message */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-15px);
+            }
+            60% {
+                transform: translateY(-7px);
+            }
+        }
+        .animate-bounce {
+            animation: bounce 1s infinite;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 text-[#4A4A4A]">
+    <div class="bg-[#FFF8DC] shadow-xl rounded-xl p-8 max-w-4xl w-full text-center border-4 border-[#CD853F]">
+        <!-- Header Section -->
+        <h1 class="text-5xl md:text-6xl font-extrabold text-[#DC143C] mb-4 drop-shadow-md">
+            Ulang Tahun Uthary Tsabitah!
+        </h1>
+        <p class="text-xl md:text-2xl text-[#A52A2A] mb-8">
+            Menghitung mundur ke tanggal 23 Juli 2025
+        </p>
+
+        <!-- Countdown Display -->
+        <div id="countdown" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div class="bg-[#FFFACD] p-6 rounded-lg shadow-md border border-[#CD853F]">
+                <div id="days" class="text-5xl md:text-7xl font-bold text-[#8B0000] countdown-digit">00</div>
+                <div class="text-lg md:text-xl text-[#B22222]">Hari</div>
+            </div>
+            <div class="bg-[#FFFACD] p-6 rounded-lg shadow-md border border-[#CD853F]">
+                <div id="hours" class="text-5xl md:text-7xl font-bold text-[#8B0000] countdown-digit">00</div>
+                <div class="text-lg md:text-xl text-[#B22222]">Jam</div>
+            </div>
+            <div class="bg-[#FFFACD] p-6 rounded-lg shadow-md border border-[#CD853F]">
+                <div id="minutes" class="text-5xl md:text-7xl font-bold text-[#8B0000] countdown-digit">00</div>
+                <div class="text-lg md:text-xl text-[#B22222]">Menit</div>
+            </div>
+            <div class="bg-[#FFFACD] p-6 rounded-lg shadow-md border border-[#CD853F]">
+                <div id="seconds" class="text-5xl md:text-7xl font-bold text-[#8B0000] countdown-digit">00</div>
+                <div class="text-lg md:text-xl text-[#B22222]">Detik</div>
+            </div>
+        </div>
+
+        <!-- Birthday Message Section (hidden until birthday) -->
+        <div id="birthdayMessage" class="hidden bg-[#FA8072] text-white p-8 rounded-lg shadow-lg">
+            <h2 class="text-4xl md:text-5xl font-extrabold mb-4 animate-bounce">
+                SELAMAT ULANG TAHUN, UTHARY TSABITAH!
+            </h2>
+            <p class="text-xl md:text-2xl">Semoga hari Anda dipenuhi kebahagiaan dan tawa!</p>
+            <p class="text-lg mt-4">Semoga semua impian Anda menjadi kenyataan.</p>
+        </div>
+
+        <!-- Mini-Game Section -->
+        <div id="gameSection" class="mt-10 p-6 bg-[#FFFACD] rounded-lg shadow-md border border-[#CD853F]">
+            <!-- Game Navigation Tabs -->
+            <div class="flex justify-center mb-6 space-x-4">
+                <button id="memoryGameTab" class="px-6 py-3 bg-[#CD853F] text-white font-bold rounded-lg shadow-lg hover:bg-[#D2691E] transition duration-300 ease-in-out transform hover:scale-105 active:scale-95">
+                    Memory Game
+                </button>
+                <button id="lyricGameTab" class="px-6 py-3 bg-[#CD853F] text-white font-bold rounded-lg shadow-lg hover:bg-[#D2691E] transition duration-300 ease-in-out transform hover:scale-105 active:scale-95">
+                    Sambung Lirik
+                </button>
+                <button id="quizGameTab" class="px-6 py-3 bg-[#CD853F] text-white font-bold rounded-lg shadow-lg hover:bg-[#D2691E] transition duration-300 ease-in-out transform hover:scale-105 active:scale-95">
+                    Quiz Game
+                </button>
+            </div>
+
+            <!-- Memory Game Content -->
+            <div id="memoryGameContent" class="game-content">
+                <h2 class="text-3xl font-bold text-[#CD853F] mb-4">Mini-Game: Memory Game</h2>
+                <p class="text-lg text-[#B22222] mb-6">Cocokkan pasangan nama personel!</p>
+                <div id="memoryGrid" class="memory-grid mb-6">
+                    <!-- Cards will be inserted here by JavaScript -->
+                </div>
+                <p id="memoryGameMessage" class="mt-4 text-xl text-[#8B0000]"></p>
+                <button id="resetMemoryGameButton"
+                        class="mt-6 px-6 py-3 bg-[#A52A2A] text-white font-bold rounded-lg shadow-lg hover:bg-[#B22222] transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 hidden">
+                    Main Lagi
+                </button>
+            </div>
+
+            <!-- Sambung Lirik Game Content -->
+            <div id="lyricGameContent" class="game-content hidden">
+                <h2 class="text-3xl font-bold text-[#CD853F] mb-4">Mini-Game: Sambung Lirik</h2>
+                <p class="text-lg text-[#B22222] mb-6">Lanjutkan lirik berikut:</p>
+                <p id="lyricHint" class="text-2xl font-semibold text-[#8B0000] mb-4"></p>
+                <input type="text" id="lyricInput"
+                       class="p-3 w-full max-w-md text-center text-xl rounded-md border-2 border-[#CD853F] focus:outline-none focus:ring-2 focus:ring-[#CD853F] bg-white text-[#8B0000] shadow-inner"
+                       placeholder="Lanjutkan liriknya...">
+                <button id="submitLyricButton"
+                        class="mt-4 px-6 py-3 bg-[#CD853F] text-white font-bold rounded-lg shadow-lg hover:bg-[#D2691E] transition duration-300 ease-in-out transform hover:scale-105 active:scale-95">
+                    Kirim
+                </button>
+                <p id="lyricGameMessage" class="mt-4 text-xl text-[#8B0000]"></p>
+                <button id="nextLyricButton"
+                        class="mt-6 px-6 py-3 bg-[#A52A2A] text-white font-bold rounded-lg shadow-lg hover:bg-[#B22222] transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 hidden">
+                    Lirik Selanjutnya
+                </button>
+                <button id="resetLyricGameButton"
+                        class="mt-6 px-6 py-3 bg-[#A52A2A] text-white font-bold rounded-lg shadow-lg hover:bg-[#B22222] transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 hidden">
+                    Mulai Ulang Game
+                </button>
+            </div>
+
+            <!-- Quiz Game Content -->
+            <div id="quizGameContent" class="game-content hidden">
+                <h2 class="text-3xl font-bold text-[#CD853F] mb-4">Mini-Game: Quiz Game</h2>
+                <p class="text-lg text-[#B22222] mb-6">Uji pengetahuan Anda tentang artis favorit!</p>
+                <div class="mb-4">
+                    <p id="questionText" class="text-xl font-semibold text-[#8B0000] mb-4"></p>
+                    <div id="optionsContainer" class="flex flex-col space-y-3">
+                        <!-- Options will be inserted here by JavaScript -->
+                    </div>
+                </div>
+                <button id="submitQuizButton"
+                        class="mt-4 px-6 py-3 bg-[#CD853F] text-white font-bold rounded-lg shadow-lg hover:bg-[#D2691E] transition duration-300 ease-in-out transform hover:scale-105 active:scale-95">
+                    Jawab
+                </button>
+                <p id="quizGameMessage" class="mt-4 text-xl text-[#8B0000]"></p>
+                <button id="nextQuestionButton"
+                        class="mt-6 px-6 py-3 bg-[#A52A2A] text-white font-bold rounded-lg shadow-lg hover:bg-[#B22222] transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 hidden">
+                    Pertanyaan Selanjutnya
+                </button>
+                <button id="resetQuizGameButton"
+                        class="mt-6 px-6 py-3 bg-[#A52A2A] text-white font-bold rounded-lg shadow-lg hover:bg-[#B22222] transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 hidden">
+                    Mulai Ulang Quiz
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set the target date for Uthary Tsabitah's birthday (July 23, 2025)
+        const birthdayDate = new Date('July 23, 2025 00:00:00').getTime();
+
+        // Get elements for countdown
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        const birthdayMessageEl = document.getElementById('birthdayMessage');
+        const countdownEl = document.getElementById('countdown');
+        const gameSectionEl = document.getElementById('gameSection');
+
+        // Game navigation elements
+        const memoryGameTab = document.getElementById('memoryGameTab');
+        const lyricGameTab = document.getElementById('lyricGameTab');
+        const quizGameTab = document.getElementById('quizGameTab'); // New quiz tab
+        const memoryGameContent = document.getElementById('memoryGameContent');
+        const lyricGameContent = document.getElementById('lyricGameContent');
+        const quizGameContent = document.getElementById('quizGameContent'); // New quiz content
+
+        // --- Countdown Logic ---
+        // Function to format numbers with leading zeros
+        function formatDigit(digit) {
+            return digit < 10 ? '0' + digit : digit;
+        }
+
+        // Main countdown function
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = birthdayDate - now;
+
+            // Calculate time units
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Display the countdown
+            daysEl.innerHTML = formatDigit(days);
+            hoursEl.innerHTML = formatDigit(hours);
+            minutesEl.innerHTML = formatDigit(minutes);
+            secondsEl.innerHTML = formatDigit(seconds);
+
+            // If the countdown is over, display birthday message and hide game
+            if (distance < 0) {
+                clearInterval(countdownInterval); // Stop the countdown
+                daysEl.innerHTML = "00";
+                hoursEl.innerHTML = "00";
+                minutesEl.innerHTML = "00";
+                secondsEl.innerHTML = "00";
+
+                countdownEl.classList.add('hidden'); // Hide countdown
+                gameSectionEl.classList.add('hidden'); // Hide game
+                birthdayMessageEl.classList.remove('hidden'); // Show birthday message
+            }
+        }
+
+        // Run the countdown function every 1 second
+        const countdownInterval = setInterval(updateCountdown, 1000);
+        // Initial call to display countdown immediately on page load
+        updateCountdown();
+
+
+        // --- Memory Game Logic ---
+        const memoryGrid = document.getElementById('memoryGrid');
+        const memoryGameMessage = document.getElementById('memoryGameMessage');
+        const resetMemoryGameButton = document.getElementById('resetMemoryGameButton');
+
+        // Updated card icons with SEVENTEEN and One Direction members
+        // NOTE: For actual images, you would replace these strings with <img> tags pointing to your hosted images.
+        // Example: '<img src="url_to_your_image.jpg" alt="S.Coups" class="h-full w-full object-cover rounded-md">'
+        const selectedMembers = [
+            'S.Coups', 'Jeonghan', 'Hoshi', 'Vernon', // SEVENTEEN (Vernon included)
+            'Harry', 'Liam', 'Louis', 'Niall' // One Direction
+        ];
+
+        let cards = [];
+        let flippedCards = [];
+        let matchedCards = [];
+        let lockBoard = false;
+
+        // Function to shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Create the memory game board
+        function createBoard() {
+            memoryGrid.innerHTML = ''; // Clear previous board
+            memoryGameMessage.textContent = '';
+            resetMemoryGameButton.classList.add('hidden');
+
+            // Create pairs from the selected members
+            cards = [...selectedMembers, ...selectedMembers];
+            shuffleArray(cards);
+
+            cards.forEach((name, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('memory-card');
+                cardElement.dataset.name = name; // Use dataset.name instead of dataset.icon
+                cardElement.dataset.index = index; // Unique index for each card instance
+
+                cardElement.innerHTML = `
+                    <div class="back-face bg-[#CD853F] rounded-lg w-full h-full flex items-center justify-center text-3xl">?</div>
+                    <div class="front-face bg-[#FFFACD] rounded-lg w-full h-full flex items-center justify-center p-1 text-sm md:text-base">${name}</div>
+                `;
+                cardElement.addEventListener('click', flipCard);
+                memoryGrid.appendChild(cardElement);
+            });
+
+            flippedCards = [];
+            matchedCards = [];
+            lockBoard = false;
+        }
+
+        // Flip a card
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === flippedCards[0]) return; // Prevent double clicking the same card
+
+            this.classList.add('flipped');
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+                lockBoard = true;
+                checkForMatch();
+            }
+        }
+
+        // Check if flipped cards match
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            const isMatch = card1.dataset.name === card2.dataset.name; // Compare by name
+
+            if (isMatch) {
+                disableCards();
+            } else {
+                unflipCards();
+            }
+        }
+
+        // Disable matched cards
+        function disableCards() {
+            const [card1, card2] = flippedCards;
+            card1.classList.add('matched');
+            card2.classList.add('matched');
+            card1.removeEventListener('click', flipCard);
+            card2.removeEventListener('click', flipCard);
+            matchedCards.push(card1, card2);
+
+            resetBoard();
+            checkWin();
+        }
+
+        // Unflip non-matched cards
+        function unflipCards() {
+            const [card1, card2] = flippedCards;
+            setTimeout(() => {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                resetBoard();
+            }, 1000); // Wait 1 second before flipping back
+        }
+
+        // Reset flipped cards and unlock board
+        function resetBoard() {
+            [flippedCards, lockBoard] = [[], false];
+        }
+
+        // Check if all cards are matched
+        function checkWin() {
+            if (matchedCards.length === cards.length) {
+                memoryGameMessage.textContent = 'Selamat! Anda menemukan semua pasangan!';
+                resetMemoryGameButton.classList.remove('hidden');
+            }
+        }
+
+        // Event listener for reset memory game button
+        resetMemoryGameButton.addEventListener('click', createBoard);
+
+
+        // --- Sambung Lirik Game Logic ---
+        const lyricHintEl = document.getElementById('lyricHint');
+        const lyricInput = document.getElementById('lyricInput');
+        const submitLyricButton = document.getElementById('submitLyricButton');
+        const lyricGameMessage = document.getElementById('lyricGameMessage');
+        const nextLyricButton = document.getElementById('nextLyricButton');
+        const resetLyricGameButton = document.getElementById('resetLyricGameButton');
+
+        const lyrics = [
+            // Taylor Swift
+            { artist: "Taylor Swift", hint: "Cause, baby, now we've got bad blood...", answer: "You know it used to be mad love" },
+            { artist: "Taylor Swift", hint: "I'm feeling '22'...", answer: "Everything will be alright if you keep me next to you" },
+            { artist: "Taylor Swift", hint: "It's a love story, baby, just say...", answer: "Yes" },
+            // One Direction
+            { artist: "One Direction", hint: "You're insecure, don't know what for...", answer: "You're turning heads when you walk through the door" },
+            { artist: "One Direction", hint: "And all the roads we have to walk are winding...", answer: "And all the lights that lead us there are blinding" },
+            { artist: "One Direction", hint: "You and I, we were made for...", answer: "A story" },
+            // SEVENTEEN
+            { artist: "SEVENTEEN", hint: "울고 싶지 않아 (ulgo sipji ana)...", answer: "난 울고 싶지 않아" }, // Don't Wanna Cry
+            { artist: "SEVENTEEN", hint: "아주 NICE (Aju Nice)...", answer: "오늘 하루도 아주 NICE" }, // Aju Nice
+            { artist: "SEVENTEEN", hint: "HOT! HOT! HOT! HOT!...", answer: "HOT! HOT! HOT! HOT!" } // HOT
+        ];
+
+        let shuffledLyrics = [];
+        let currentLyricIndex = 0;
+        let score = 0;
+
+        // Initialize the lyric game
+        function initializeLyricGame() {
+            shuffledLyrics = shuffleArray([...lyrics]); // Shuffle lyrics for each new game
+            currentLyricIndex = 0;
+            score = 0;
+            lyricInput.value = '';
+            lyricInput.disabled = false;
+            submitLyricButton.disabled = false;
+            lyricGameMessage.textContent = '';
+            nextLyricButton.classList.add('hidden');
+            resetLyricGameButton.classList.add('hidden');
+            displayCurrentLyric();
+        }
+
+        // Display the current lyric hint
+        function displayCurrentLyric() {
+            if (currentLyricIndex < shuffledLyrics.length) {
+                const currentLyric = shuffledLyrics[currentLyricIndex];
+                lyricHintEl.textContent = `(${currentLyric.artist}) ${currentLyric.hint}`;
+                lyricInput.value = '';
+                lyricInput.focus();
+                lyricGameMessage.textContent = '';
+                submitLyricButton.classList.remove('hidden');
+                nextLyricButton.classList.add('hidden');
+            } else {
+                lyricHintEl.textContent = 'Game Selesai!';
+                lyricInput.disabled = true;
+                submitLyricButton.disabled = true;
+                lyricGameMessage.textContent = `Skor Anda: ${score} dari ${shuffledLyrics.length} lirik.`;
+                resetLyricGameButton.classList.remove('hidden');
+                submitLyricButton.classList.add('hidden');
+            }
+        }
+
+        // Check the user's answer for the lyric game
+        function checkLyricAnswer() {
+            const userAnswer = lyricInput.value.trim();
+            const correctAnswer = shuffledLyrics[currentLyricIndex].answer.trim();
+
+            if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+                lyricGameMessage.textContent = 'Benar! �';
+                score++;
+            } else {
+                lyricGameMessage.textContent = `Salah. Jawaban yang benar adalah: "${correctAnswer}"`;
+            }
+            lyricInput.disabled = true;
+            submitLyricButton.classList.add('hidden');
+            nextLyricButton.classList.remove('hidden');
+        }
+
+        // Move to the next lyric
+        function nextLyric() {
+            currentLyricIndex++;
+            displayCurrentLyric();
+        }
+
+        // Event listeners for lyric game
+        submitLyricButton.addEventListener('click', checkLyricAnswer);
+        nextLyricButton.addEventListener('click', nextLyric);
+        resetLyricGameButton.addEventListener('click', initializeLyricGame);
+
+
+        // --- Quiz Game Logic ---
+        const questionTextEl = document.getElementById('questionText');
+        const optionsContainerEl = document.getElementById('optionsContainer');
+        const submitQuizButton = document.getElementById('submitQuizButton');
+        const quizGameMessage = document.getElementById('quizGameMessage');
+        const nextQuestionButton = document.getElementById('nextQuestionButton');
+        const resetQuizGameButton = document.getElementById('resetQuizGameButton');
+
+        const quizQuestions = [
+            {
+                question: "Album Taylor Swift mana yang menampilkan lagu 'Shake It Off'?",
+                options: ["Red", "1989", "Fearless", "Lover"],
+                answer: "1989"
+            },
+            {
+                question: "Berapa nomor keberuntungan Taylor Swift?",
+                options: ["7", "13", "22", "89"],
+                answer: "13"
+            },
+            {
+                question: "Siapa anggota One Direction yang meninggalkan grup pada tahun 2015?",
+                options: ["Harry", "Liam", "Niall", "Zayn"],
+                answer: "Zayn"
+            },
+            {
+                question: "Apa judul single debut One Direction?",
+                options: ["Story of My Life", "What Makes You Beautiful", "Live While We're Young", "Best Song Ever"],
+                answer: "What Makes You Beautiful"
+            },
+            {
+                question: "Berapa jumlah anggota SEVENTEEN?",
+                options: ["11", "13", "15", "17"],
+                answer: "13"
+            },
+            {
+                question: "Apa nama fandom resmi SEVENTEEN?",
+                options: ["ARMY", "EXO-L", "Carat", "BLINK"],
+                answer: "Carat"
+            }
+        ];
+
+        let shuffledQuizQuestions = [];
+        let currentQuestionIndex = 0;
+        let quizScore = 0;
+        let selectedOption = null; // To store the currently selected radio button
+
+        // Initialize the quiz game
+        function initializeQuizGame() {
+            shuffledQuizQuestions = shuffleArray([...quizQuestions]);
+            currentQuestionIndex = 0;
+            quizScore = 0;
+            quizGameMessage.textContent = '';
+            submitQuizButton.classList.remove('hidden');
+            nextQuestionButton.classList.add('hidden');
+            resetQuizGameButton.classList.add('hidden');
+            displayQuestion();
+        }
+
+        // Display the current quiz question and options
+        function displayQuestion() {
+            if (currentQuestionIndex < shuffledQuizQuestions.length) {
+                const currentQuiz = shuffledQuizQuestions[currentQuestionIndex];
+                questionTextEl.textContent = currentQuiz.question;
+                optionsContainerEl.innerHTML = ''; // Clear previous options
+                selectedOption = null; // Reset selected option
+
+                currentQuiz.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.classList.add('flex', 'items-center', 'justify-center');
+                    optionDiv.innerHTML = `
+                        <input type="radio" id="option${index}" name="quizOption" value="${option}" class="hidden peer">
+                        <label for="option${index}" class="w-full py-3 px-4 rounded-lg cursor-pointer border-2 border-[#CD853F] text-[#8B0000] text-lg font-medium
+                                    hover:bg-[#FFFACD] transition-colors duration-200 peer-checked:bg-[#CD853F] peer-checked:text-white peer-checked:border-[#A52A2A]">
+                            ${option}
+                        </label>
+                    `;
+                    optionsContainerEl.appendChild(optionDiv);
+
+                    // Add event listener to update selectedOption
+                    optionDiv.querySelector('input[type="radio"]').addEventListener('change', (event) => {
+                        selectedOption = event.target.value;
+                    });
+                });
+
+                submitQuizButton.disabled = false;
+            } else {
+                questionTextEl.textContent = 'Quiz Selesai!';
+                optionsContainerEl.innerHTML = '';
+                submitQuizButton.classList.add('hidden');
+                quizGameMessage.textContent = `Skor Anda: ${quizScore} dari ${shuffledQuizQuestions.length} pertanyaan.`;
+                resetQuizGameButton.classList.remove('hidden');
+            }
+        }
+
+        // Check the user's answer for the quiz game
+        function checkAnswer() {
+            if (!selectedOption) {
+                quizGameMessage.textContent = 'Pilih salah satu jawaban!';
+                return;
+            }
+
+            const correctAnswer = shuffledQuizQuestions[currentQuestionIndex].answer;
+            if (selectedOption === correctAnswer) {
+                quizGameMessage.textContent = 'Benar! 🎉';
+                quizScore++;
+            } else {
+                quizGameMessage.textContent = `Salah. Jawaban yang benar adalah: "${correctAnswer}"`;
+            }
+
+            submitQuizButton.disabled = true;
+            nextQuestionButton.classList.remove('hidden');
+            // Disable all radio buttons after answer
+            optionsContainerEl.querySelectorAll('input[type="radio"]').forEach(radio => radio.disabled = true);
+        }
+
+        // Move to the next quiz question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            nextQuestionButton.classList.add('hidden');
+            displayQuestion();
+        }
+
+        // Event listeners for quiz game
+        submitQuizButton.addEventListener('click', checkAnswer);
+        nextQuestionButton.addEventListener('click', nextQuestion);
+        resetQuizGameButton.addEventListener('click', initializeQuizGame);
+
+
+        // --- Game Tab Switching Logic ---
+        function showGame(gameId) {
+            memoryGameContent.classList.add('hidden');
+            lyricGameContent.classList.add('hidden');
+            quizGameContent.classList.add('hidden'); // Hide new quiz content
+
+            // Reset game states when switching tabs
+            // (Optional: if you want games to reset every time you switch)
+            // createBoard();
+            // initializeLyricGame();
+            // initializeQuizGame();
+
+            if (gameId === 'memory') {
+                memoryGameContent.classList.remove('hidden');
+                createBoard(); // Initialize Memory Game when its tab is active
+            } else if (gameId === 'lyric') {
+                lyricGameContent.classList.remove('hidden');
+                initializeLyricGame(); // Initialize Lyric Game when its tab is active
+            } else if (gameId === 'quiz') { // Handle new quiz tab
+                quizGameContent.classList.remove('hidden');
+                initializeQuizGame(); // Initialize Quiz Game when its tab is active
+            }
+        }
+
+        memoryGameTab.addEventListener('click', () => showGame('memory'));
+        lyricGameTab.addEventListener('click', () => showGame('lyric'));
+        quizGameTab.addEventListener('click', () => showGame('quiz')); // New event listener for quiz tab
+
+        // Initial game display (show Memory Game by default)
+        showGame('memory');
+    </script>
+</body>
+</html>
+�
