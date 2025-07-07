@@ -38,11 +38,11 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr); /* 4 columns */
             gap: 1rem; /* 16px */
-            max-width: 400px; /* Limit grid width */
+            max-width: 400px; /* Limit grid width, allows shrinking on smaller screens */
             margin: 0 auto;
         }
         .memory-card {
-            width: 80px; /* Fixed width for cards */
+            width: 80px; /* Fixed width for cards - will maintain size even on small screens */
             height: 80px; /* Fixed height for cards */
             display: flex;
             align-items: center;
@@ -50,7 +50,6 @@
             background-color: #CD853F; /* Peru - card back */
             border-radius: 0.5rem; /* rounded-lg */
             cursor: pointer;
-            font-size: 0.9rem; /* Smaller font for names */
             font-weight: bold;
             color: #FFFACD; /* Lemon Chiffon - text on card back */
             transform-style: preserve-3d;
@@ -60,6 +59,8 @@
             text-align: center; /* Center text for names */
             padding: 5px; /* Add padding for longer names */
             line-height: 1.2; /* Adjust line height for readability */
+            /* Font size for names on memory cards. Tailwind's text-sm (0.875rem) is used in front-face. */
+            /* This ensures readability on mobile while still fitting names. */
         }
         .memory-card.flipped {
             transform: rotateY(180deg);
@@ -455,10 +456,6 @@
                 const currentLyric = shuffledLyrics[currentLyricIndex];
                 lyricHintEl.textContent = `(${currentLyric.artist}) ${currentLyric.hint}`;
                 lyricInput.value = '';
-                lyricInput.focus();
-                lyricGameMessage.textContent = '';
-                submitLyricButton.classList.remove('hidden');
-                nextLyricButton.classList.add('hidden');
             } else {
                 lyricHintEl.textContent = 'Game Selesai!';
                 lyricInput.disabled = true;
@@ -467,6 +464,7 @@
                 resetLyricGameButton.classList.remove('hidden');
                 submitLyricButton.classList.add('hidden');
             }
+            lyricInput.focus(); // Ensure input is focused for easy typing on mobile
         }
 
         // Check the user's answer for the lyric game
@@ -488,7 +486,7 @@
         // Move to the next lyric
         function nextLyric() {
             currentLyricIndex++;
-            displayCurrentLyric();
+            displayLyric(); // Call displayLyric to show the next question
         }
 
         // Event listeners for lyric game
@@ -565,7 +563,8 @@
 
                 currentQuiz.options.forEach((option, index) => {
                     const optionDiv = document.createElement('div');
-                    optionDiv.classList.add('flex', 'items-center', 'justify-center');
+                    // Ensure full width for options on mobile
+                    optionDiv.classList.add('flex', 'items-center', 'justify-center', 'w-full');
                     optionDiv.innerHTML = `
                         <input type="radio" id="option${index}" name="quizOption" value="${option}" class="hidden peer">
                         <label for="option${index}" class="w-full py-3 px-4 rounded-lg cursor-pointer border-2 border-[#CD853F] text-[#8B0000] text-lg font-medium
@@ -627,31 +626,32 @@
 
         // --- Game Tab Switching Logic ---
         function showGame(gameId) {
+            // Hide all game contents first
             memoryGameContent.classList.add('hidden');
             lyricGameContent.classList.add('hidden');
-            quizGameContent.classList.add('hidden'); // Hide new quiz content
+            quizGameContent.classList.add('hidden');
 
-            // Reset game states when switching tabs
-            // (Optional: if you want games to reset every time you switch)
-            // createBoard();
-            // initializeLyricGame();
-            // initializeQuizGame();
+            // Reset game states when switching tabs to ensure a fresh start
+            // (This can be adjusted if you want game progress to persist between tab switches)
+            // For now, it resets for a clean experience.
+            createBoard(); // Resets Memory Game
+            initializeLyricGame(); // Resets Sambung Lirik Game
+            initializeQuizGame(); // Resets Quiz Game
 
+            // Show the selected game content and initialize it
             if (gameId === 'memory') {
                 memoryGameContent.classList.remove('hidden');
-                createBoard(); // Initialize Memory Game when its tab is active
             } else if (gameId === 'lyric') {
                 lyricGameContent.classList.remove('hidden');
-                initializeLyricGame(); // Initialize Lyric Game when its tab is active
-            } else if (gameId === 'quiz') { // Handle new quiz tab
+            } else if (gameId === 'quiz') {
                 quizGameContent.classList.remove('hidden');
-                initializeQuizGame(); // Initialize Quiz Game when its tab is active
             }
         }
 
+        // Event listeners for game tabs
         memoryGameTab.addEventListener('click', () => showGame('memory'));
         lyricGameTab.addEventListener('click', () => showGame('lyric'));
-        quizGameTab.addEventListener('click', () => showGame('quiz')); // New event listener for quiz tab
+        quizGameTab.addEventListener('click', () => showGame('quiz'));
 
         // Initial game display (show Memory Game by default)
         showGame('memory');
